@@ -1,0 +1,19 @@
+{
+  "name": "scans-downloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.9",
+    "pdf-lib": "^1.17.1",
+    "prompt-sync": "^4.2.0",
+    "puppeteer": "^17.1.3"
+  }
+}
