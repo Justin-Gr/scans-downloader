@@ -16,17 +16,6 @@ export class ExtractManager {
 		});
 	}
 
-	fetchChapterPages(chapterPath) {
-		return fs.readdirSync(chapterPath).filter((image, _, images) => {
-			const imageName = path.parse(image).name;
-			return !images.includes(`${imageName} - Colo.png`);
-		}).sort((a, b) => {
-			const aNum = Number.parseInt(a.split(' ')[1]);
-			const bNum = Number.parseInt(b.split(' ')[1]);
-			return aNum - bNum;
-		});
-	}
-
 	async extractZipFiles(cleanZips = true, compileToPdf = true) {
 		const zipFiles = this.fetchZipFiles();
 
@@ -51,6 +40,32 @@ export class ExtractManager {
 		}
 	}
 
+	fetchChapterPages(chapterPath) {
+		return fs.readdirSync(chapterPath).filter((image, _, images) => {
+			const imageName = path.parse(image).name;
+			return !images.includes(`${imageName} - Colo.png`);
+		}).sort((a, b) => {
+			const aNum = Number.parseInt(a.split(/[ .]/)[1]);
+			const bNum = Number.parseInt(b.split(/[ .]/)[1]);
+			return aNum - bNum;
+		});
+	}
+
+	async generatePdfImage(pdfDoc, chapterPath, chapterPage) {
+		const imageBuffer = fs.readFileSync(`${chapterPath}/${chapterPage}`);
+		const [imageJpg, imagePng] = await Promise.allSettled([
+			pdfDoc.embedJpg(imageBuffer),
+			pdfDoc.embedPng(imageBuffer)
+		]);
+
+		if (imageJpg.status === 'rejected' && imagePng.status === 'rejected') {
+			console.error(`Impossible de convertir la page ${chapterPage.split(/[ .]/)[1]}, elle sera manquante :(`);
+			return null;
+		}
+
+		return imageJpg.status === 'fulfilled' ? imageJpg .value: imagePng.value;
+	}
+
 	async generatePdf(chapterDir) {
 		const chapterPath = `${this.outputPath}/${chapterDir}`;
 		const chapterPages = this.fetchChapterPages(chapterPath);
@@ -59,21 +74,16 @@ export class ExtractManager {
 
 		for (let chapterPage of chapterPages) {
 			const page = pdfDoc.addPage();
-			const imageBuffer = fs.readFileSync(`${chapterPath}/${chapterPage}`);
+			const image = await this.generatePdfImage(pdfDoc, chapterPath, chapterPage);
 
-			let image;
-			try {
-				image = await pdfDoc.embedJpg(imageBuffer);
-			} catch (ex) {
-				image = await pdfDoc.embedPng(imageBuffer);
+			if (image) {
+				page.drawImage(image, {
+					x: 0,
+					y: 0,
+					width: page.getWidth(),
+					height: page.getHeight()
+				});
 			}
-
-			page.drawImage(image, {
-				x: 0,
-				y: 0,
-				width: page.getWidth(),
-				height: page.getHeight()
-			});
 		}
 
 		const pdfBytes = await pdfDoc.save();
