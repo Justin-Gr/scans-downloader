@@ -53,17 +53,17 @@ export class ExtractManager {
 
 	async generatePdfImage(pdfDoc, chapterPath, chapterPage) {
 		const imageBuffer = fs.readFileSync(`${chapterPath}/${chapterPage}`);
-		const [imageJpg, imagePng] = await Promise.allSettled([
+		const embeddingAttempts = Array.from(await Promise.allSettled([
 			pdfDoc.embedJpg(imageBuffer),
 			pdfDoc.embedPng(imageBuffer)
-		]);
+		]));
 
-		if (imageJpg.status === 'rejected' && imagePng.status === 'rejected') {
+		if (embeddingAttempts.every(attempt => attempt.status === 'rejected')) {
 			console.error(`Impossible de convertir la page ${chapterPage.split(/[ .]/)[1]}, elle sera manquante :(`);
 			return null;
 		}
 
-		return imageJpg.status === 'fulfilled' ? imageJpg .value: imagePng.value;
+		return embeddingAttempts.find(attempt => attempt.status === 'fulfilled').value;
 	}
 
 	async generatePdf(chapterDir) {
@@ -77,11 +77,12 @@ export class ExtractManager {
 			const image = await this.generatePdfImage(pdfDoc, chapterPath, chapterPage);
 
 			if (image) {
+				page.setSize(image.width, image.height);
 				page.drawImage(image, {
 					x: 0,
 					y: 0,
-					width: page.getWidth(),
-					height: page.getHeight()
+					width: image.width,
+					height: image.height
 				});
 			}
 		}
