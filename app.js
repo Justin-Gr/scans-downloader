@@ -5,6 +5,9 @@ import * as path from 'path';
 import promptSync from 'prompt-sync';
 const prompt = promptSync({});
 
+const URL = 'https://littlexgarden.com';
+const MANGA = 'bleach';
+
 const DOWNLOAD_PATH = path.resolve('./downloads');
 const OUTPUT_PATH = path.resolve('./outputs');
 
@@ -18,7 +21,9 @@ const main = async () => {
 		'_\\ \\ (_| (_| | | | \\__ \\_____| (_| | (_) \\ V  V /| | | | | (_) | (_| | (_| |  __/ |   \n' +
 		'\\__/\\___\\__,_|_| |_|___/      \\__,_|\\___/ \\_/\\_/ |_| |_|_|\\___/ \\__,_|\\__,_|\\___|_|   \n');
 
-	console.log('Utilitaire de téléchargement de scans One Piece (https://littlexgarden.com)\n');
+	console.log('Utilitaire de téléchargement de scans Little Garden (https://littlexgarden.com)\n');
+
+	console.log(`Manga paramétré : ${MANGA}\n`);
 
 	let firstChapter, lastChapter;
 	try {
@@ -32,7 +37,8 @@ const main = async () => {
 		process.exit();
 	}
 
-	const downloadManager = new DownloadManager(firstChapter, lastChapter, DOWNLOAD_PATH, async () => {
+	const uri = `${URL}/${MANGA}`;
+	const downloadManager = new DownloadManager(uri, firstChapter, lastChapter, DOWNLOAD_PATH, async () => {
 		await downloadManager.endSession();
 
 		console.log('\nFin du téléchargement, extraction des fichiers ZIP...');

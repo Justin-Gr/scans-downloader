@@ -1,10 +1,9 @@
 import * as puppeteer from 'puppeteer';
 
-const URI = 'https://littlexgarden.com/one-piece';
-
 export class DownloadManager {
 
-	constructor(firstChapter, lastChapter, downloadPath, endCallback) {
+	constructor(uri, firstChapter, lastChapter, downloadPath, endCallback) {
+		this.uri = uri;
 		this.currentChapter = firstChapter;
 		this.lastChapter = lastChapter;
 		this.downloadPath = downloadPath;
@@ -57,7 +56,7 @@ export class DownloadManager {
 		console.log(`\n==========SCAN N°${this.currentChapter}==========`);
 		console.log('Chargement de la page...');
 
-		const response = await this.page.goto(`${URI}/${this.currentChapter}/1`, {
+		const response = await this.page.goto(`${this.uri}/${this.currentChapter}/1`, {
 			waitUntil: 'networkidle2'
 		});
 
