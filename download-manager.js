@@ -14,6 +14,7 @@ export class DownloadManager {
 		this.browser = await puppeteer.launch({
 			headless: true
 		});
+		await this.browser.defaultBrowserContext().overridePermissions(this.uri, ["notifications"]);
 
 		this.page = await this.browser.newPage();
 

@@ -6,7 +6,7 @@ import promptSync from 'prompt-sync';
 const prompt = promptSync({});
 
 const URL = 'https://littlexgarden.com';
-const MANGA = 'bleach';
+const MANGA = 'one-piece';
 
 const DOWNLOAD_PATH = path.resolve('./downloads');
 const OUTPUT_PATH = path.resolve('./outputs');
